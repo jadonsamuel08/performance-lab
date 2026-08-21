@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from performance_lab.display import format_event
 from performance_lab.tracer import Tracer
 
 
@@ -22,7 +23,4 @@ def test_example_program():
     assert len(tracer.events) > 0
 
     for event in tracer.events:
-        print(event)
-
-        if "locals" in event.data:
-            print("  locals:", event.data["locals"])
+        print(format_event(event))
