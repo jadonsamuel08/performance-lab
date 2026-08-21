@@ -1,24 +1,10 @@
-from pathlib import Path
-
 from performance_lab.display import format_event
-from performance_lab.tracer import Tracer
+from performance_lab.runner import Runner
 
 
 def test_example_program():
-    example_path = Path("examples/example.py").resolve()
-
-    tracer = Tracer(str(example_path))
-    tracer.start()
-
-    exec(
-        compile(
-            example_path.read_text(),
-            str(example_path),
-            "exec",
-        )
-    )
-
-    tracer.stop()
+    runner = Runner("examples/example.py")
+    tracer = runner.run()
 
     assert len(tracer.events) > 0
 
