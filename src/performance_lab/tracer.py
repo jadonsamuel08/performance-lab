@@ -12,6 +12,9 @@ class Tracer:
         self.target_file = target_file
         self.events: list[ExecutionEvent] = []
 
+    def snapshot_locals(self, frame: FrameType) -> dict[str, Any]:
+        return dict(frame.f_locals)
+
     def trace(
         self,
         frame: FrameType,
@@ -29,7 +32,9 @@ class Tracer:
                     file=frame.f_code.co_filename,
                     line=frame.f_lineno,
                     function=frame.f_code.co_name,
-                    data={},
+                    data={
+                        "locals": self.snapshot_locals(frame),
+                    },
                 )
             )
 

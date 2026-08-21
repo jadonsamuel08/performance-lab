@@ -23,3 +23,6 @@ def test_example_program():
 
     for event in tracer.events:
         print(event)
+
+        if "locals" in event.data:
+            print("  locals:", event.data["locals"])
