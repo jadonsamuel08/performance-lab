@@ -1,12 +1,11 @@
-from performance_lab.display import format_event
 from performance_lab.runner import Runner
 
 
 def test_example_program():
     runner = Runner("examples/example.py")
-    tracer = runner.run()
+    result = runner.run()
 
-    assert len(tracer.events) > 0
+    assert result.returncode == 0
+    assert "Hello, Jadon!" in result.stdout
 
-    for event in tracer.events:
-        print(format_event(event))
+    print(result.stdout)
