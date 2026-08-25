@@ -148,3 +148,33 @@ def test_call_tree_handles_nested_calls():
     assert module.function == "<module>"
     assert outer.function == "outer"
     assert inner.function == "inner"
+
+
+def test_call_tree_records_timing():
+    tree = CallTree(make_events())
+    root = tree.build()
+
+    module = root.children[0]
+    greet = module.children[0]
+
+    assert greet.start_timestamp == 2.0
+    assert greet.end_timestamp == 4.0
+    assert greet.duration == 2.0
+
+
+def test_call_tree_records_return_value():
+    tree = CallTree(make_events())
+    root = tree.build()
+
+    greet = root.children[0].children[0]
+
+    assert greet.return_value == "Hello, Jadon!"
+
+
+def test_call_tree_counts_events():
+    tree = CallTree(make_events())
+    root = tree.build()
+
+    greet = root.children[0].children[0]
+
+    assert greet.event_count == 2
