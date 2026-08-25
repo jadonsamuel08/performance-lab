@@ -93,3 +93,29 @@ def test_timeline_length():
     timeline = Timeline(make_events())
 
     assert len(timeline) == 3
+
+
+def test_timeline_navigation():
+    timeline = Timeline(make_events())
+
+    timeline.step_forward()
+
+    assert timeline.current_index == 0
+    assert timeline.total_events == 3
+    assert timeline.previous_event is None
+    assert timeline.next_event is not None
+
+
+def test_timeline_progress():
+    timeline = Timeline(make_events())
+
+    assert timeline.progress == 0.0
+
+    timeline.step_forward()
+    assert timeline.progress == 1 / 3
+
+    timeline.step_forward()
+    assert timeline.progress == 2 / 3
+
+    timeline.step_forward()
+    assert timeline.progress == 1.0
