@@ -1,10 +1,12 @@
 from performance_lab.events import ExecutionEvent
+from performance_lab.state import ProgramState
 
 
 class Recorder:
     def __init__(self, events: list[ExecutionEvent]) -> None:
         self.events = events
         self.position = -1
+        self.state = ProgramState()
 
     @property
     def current(self) -> ExecutionEvent | None:
@@ -26,15 +28,31 @@ class Recorder:
             return self.current
 
         self.position += 1
-        return self.current
+
+        event = self.current
+
+        if event is not None:
+            self.state.apply(event)
+
+        return event
 
     def step_back(self) -> ExecutionEvent | None:
         if self.position <= 0:
-            self.position = -1
+            self.reset()
             return None
 
         self.position -= 1
+
+        self._rebuild_state()
+
         return self.current
 
     def reset(self) -> None:
         self.position = -1
+        self.state = ProgramState()
+
+    def _rebuild_state(self) -> None:
+        self.state = ProgramState()
+
+        for event in self.events[: self.position + 1]:
+            self.state.apply(event)

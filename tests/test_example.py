@@ -61,3 +61,38 @@ def test_recorder_can_step_back_and_reset():
 
     assert recorder.current is None
     assert recorder.started is False
+
+def test_recorder_tracks_program_state():
+    runner = Runner("examples/example.py")
+    result = runner.run()
+
+    recorder = Recorder(result.events)
+
+    while not recorder.finished:
+        recorder.step_forward()
+
+    state = recorder.state.snapshot()
+
+    assert state["name"] == "Jadon"
+    assert state["result"] == "Hello, Jadon!"
+
+
+def test_recorder_rebuilds_state_when_stepping_back():
+    runner = Runner("examples/example.py")
+    result = runner.run()
+
+    recorder = Recorder(result.events)
+
+    while not recorder.finished:
+        recorder.step_forward()
+
+    final_state = recorder.state.snapshot()
+
+    recorder.step_back()
+    recorder.step_back()
+
+    previous_state = recorder.state.snapshot()
+
+    assert final_state != previous_state
+    assert final_state["result"] == "Hello, Jadon!"
+    assert "result" not in previous_state
