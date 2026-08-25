@@ -2,27 +2,32 @@
 
 A Python execution visualization and analysis tool that captures what happens inside a running program.
 
-> 🚧 **Early development** — the project is currently focused on building the execution-tracing and replay backend.
+> 🚧 **Early development** — the project is currently focused on building the execution-analysis backend before moving into the interactive digital microscope.
 
 ## What is this?
 
 Performance Lab is being built as a **digital microscope for Python programs**.
 
-The goal is to make program execution easier to understand by capturing events such as:
+The goal is to make program execution easier to understand by capturing and analyzing events such as:
 
 - Function calls
 - Line execution
 - Function returns
 - Exceptions
 - Variable and program state
+- Execution timing
+- Function relationships
+- Runtime statistics
 
-Eventually, these events will power an interactive interface that lets you explore a program's execution step by step.
+These observations can be replayed and analyzed as a structured execution history.
+
+Eventually, they will power an interactive interface that lets you explore a program's execution step by step.
 
 ## Current Status
 
 ### Execution Tracing
 
-The current prototype can:
+The current system can:
 
 - Trace Python program execution
 - Identify function calls and returns
@@ -31,6 +36,7 @@ The current prototype can:
 - Associate events with their source file and line number
 - Capture local variable state during execution
 - Store observations as structured `ExecutionEvent` objects
+- Record execution timestamps
 
 Example execution:
 
@@ -54,7 +60,7 @@ Performance Lab can execute a target Python program through a bootstrap layer an
     Target Program
           │
           ▼
-       Runner
+        Runner
           │
           ▼
       Bootstrap
@@ -79,7 +85,9 @@ It currently supports:
 - Stepping forward through execution
 - Stepping backward through execution
 - Resetting execution
-- Rebuilding program state when stepping backward
+- Jumping directly to an execution event
+- Tracking replay progress
+- Rebuilding program state when navigating backward or jumping
 - Tracking variables across function scopes
 - Removing local state when a function returns
 
@@ -111,10 +119,39 @@ Example:
 
 This is the foundation for the eventual interactive execution timeline and digital microscope.
 
+### Execution Analysis
+
+Performance Lab now provides higher-level analysis of a captured execution.
+
+The system can build:
+
+- An execution timeline
+- A function call tree
+- Runtime statistics
+- Execution summaries
+- Navigable execution history
+- Reconstructable program state
+
+These analysis tools are exposed through a unified `Execution` object.
+
+The public API can be used as:
+
+    from performance_lab import run
+
+    execution = run("examples/example.py")
+
+    execution.events
+    execution.recorder
+    execution.timeline
+    execution.call_tree
+    execution.statistics
+    execution.summary
+
+This creates a clean boundary between the execution engine and the future visualization layer.
+
 ## Project Structure
 
     performance-lab/
-
     │
     ├── examples/
     │   └── example.py
@@ -122,16 +159,27 @@ This is the foundation for the eventual interactive execution timeline and digit
     ├── src/
     │   └── performance_lab/
     │       ├── __init__.py
+    │       ├── api.py
     │       ├── bootstrap.py
+    │       ├── call_tree.py
+    │       ├── display.py
     │       ├── events.py
+    │       ├── execution.py
     │       ├── recorder.py
     │       ├── runner.py
     │       ├── state.py
+    │       ├── statistics.py
+    │       ├── summary.py
+    │       ├── timeline.py
     │       └── tracer.py
     │
     ├── tests/
+    │   ├── test_api.py
+    │   ├── test_call_tree.py
     │   ├── test_example.py
+    │   ├── test_execution.py
     │   ├── test_state.py
+    │   ├── test_timeline.py
     │   └── test_tracer.py
     │
     ├── .gitignore
@@ -157,7 +205,13 @@ Run the execution bootstrap:
 
     uv run python -m performance_lab.bootstrap examples/example.py
 
-The current test suite contains 12 tests covering execution, tracing, state tracking, and replay behavior.
+Use the public execution API:
+
+    from performance_lab import run
+
+    execution = run("examples/example.py")
+
+The current test suite contains **52 tests** covering execution, tracing, program state, recording, timeline navigation, call trees, statistics, summaries, the unified execution model, and the public API.
 
 ## Roadmap
 
@@ -169,6 +223,7 @@ The current test suite contains 12 tests covering execution, tracing, state trac
 - [x] Line execution tracking
 - [x] Exception tracking
 - [x] Local variable state capture
+- [x] Execution timestamps
 
 ### Phase 2 — Execution Engine
 
@@ -182,20 +237,27 @@ The current test suite contains 12 tests covering execution, tracing, state trac
 - [x] Forward execution stepping
 - [x] Backward execution stepping
 - [x] State reconstruction during rewind
-- [ ] Improve event filtering and serialization
+- [x] Direct event navigation
+- [x] Execution progress tracking
+- [x] Unified `Execution` object
+- [x] Public `run()` API
 
 ### Phase 3 — Execution Analysis
 
-- [ ] Unified execution timeline
-- [ ] Event indexing and navigation
-- [ ] Function call tree
-- [ ] Variable/state change tracking
-- [ ] Runtime statistics
-- [ ] Execution summaries
-- [ ] Replay API
+- [x] Unified execution timeline
+- [x] Event indexing and navigation
+- [x] Function call tree
+- [x] Variable/state change tracking
+- [x] Runtime statistics
+- [x] Execution summaries
+- [x] Replay API
+- [x] Unified analysis interface
+- [x] Comprehensive automated test coverage
 
 ### Phase 4 — Digital Microscope
 
+- [ ] Design execution view model
+- [ ] Represent a single point in program execution
 - [ ] Visualize program execution
 - [ ] Interactive execution timeline
 - [ ] Function/call visualization
@@ -218,7 +280,7 @@ The current test suite contains 12 tests covering execution, tracing, state trac
 - [ ] Memory analysis
 - [ ] Execution comparisons
 - [ ] Advanced debugging capabilities
-- [ ] Support for larger Python projects
+- [ ] Support for larger and more complex Python applications
 
 ## License
 
