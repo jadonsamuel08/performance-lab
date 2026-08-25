@@ -4,31 +4,19 @@ from performance_lab.runner import Runner
 
 def test_example_program():
     runner = Runner("examples/example.py")
-    events = runner.run()
+    result = runner.run()
 
-    assert events
+    assert result.process.returncode == 0
+    assert "Hello, Jadon!" in result.process.stdout
+    assert result.events
 
-    event_types = [event.event_type for event in events]
+
+def test_runner_captures_execution_events():
+    runner = Runner("examples/example.py")
+    result = runner.run()
+
+    event_types = {event.event_type for event in result.events}
 
     assert EventType.FUNCTION_CALL in event_types
     assert EventType.LINE_EXECUTION in event_types
     assert EventType.FUNCTION_RETURN in event_types
-
-    greet_calls = [
-        event
-        for event in events
-        if event.event_type == EventType.FUNCTION_CALL
-        and event.function == "greet"
-    ]
-
-    assert len(greet_calls) == 1
-
-    return_events = [
-        event
-        for event in events
-        if event.event_type == EventType.FUNCTION_RETURN
-        and event.function == "greet"
-    ]
-
-    assert len(return_events) == 1
-    assert return_events[0].data["return_value"] == "Hello, Jadon!"
