@@ -22,3 +22,11 @@ def test_run_captures_program_output():
     execution = run("examples/example.py")
 
     assert "Hello, Jadon!" in execution.process.stdout
+
+def test_run_is_available_from_package():
+    from performance_lab import run
+
+    execution = run("examples/example.py")
+
+    assert execution.succeeded
+    assert execution.events
