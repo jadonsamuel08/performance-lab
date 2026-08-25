@@ -13,7 +13,21 @@ class Tracer:
         self.events: list[ExecutionEvent] = []
 
     def snapshot_locals(self, frame: FrameType) -> dict[str, Any]:
-        return dict(frame.f_locals)
+        ignored_names = {
+            "__name__",
+            "__file__",
+            "__builtins__",
+            "__package__",
+            "__loader__",
+            "__spec__",
+            "__cached__",
+        }
+
+        return {
+            name: value
+            for name, value in frame.f_locals.items()
+            if name not in ignored_names
+        }
 
     def trace(
         self,
@@ -58,7 +72,9 @@ class Tracer:
                     file=frame.f_code.co_filename,
                     line=frame.f_lineno,
                     function=frame.f_code.co_name,
-                    data={"return_value": arg},
+                    data={
+                        "return_value": arg,
+                    },
                 )
             )
 
