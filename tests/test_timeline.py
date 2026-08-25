@@ -1,6 +1,9 @@
 from performance_lab.events import EventType, ExecutionEvent
 from performance_lab.timeline import Timeline
 
+from performance_lab.recorder import Recorder
+from performance_lab.runner import Runner
+
 
 def make_events() -> list[ExecutionEvent]:
     return [
@@ -119,3 +122,67 @@ def test_timeline_progress():
 
     timeline.step_forward()
     assert timeline.progress == 1.0
+
+def test_recorder_jump_to_event():
+    runner = Runner("examples/example.py")
+    result = runner.run()
+
+    recorder = Recorder(result.events)
+
+    event = recorder.jump_to(3)
+
+    assert event is not None
+    assert recorder.position == 3
+    assert recorder.current == event
+
+
+def test_recorder_jump_rebuilds_state():
+    runner = Runner("examples/example.py")
+    result = runner.run()
+
+    recorder = Recorder(result.events)
+
+    recorder.jump_to(8)
+
+    state = recorder.state.snapshot()
+
+    assert state["name"] == "Jadon"
+    assert state["result"] == "Hello, Jadon!"
+
+
+def test_recorder_jump_clamps_to_start():
+    runner = Runner("examples/example.py")
+    result = runner.run()
+
+    recorder = Recorder(result.events)
+
+    event = recorder.jump_to(-100)
+
+    assert event is not None
+    assert recorder.position == 0
+
+
+def test_recorder_jump_clamps_to_end():
+    runner = Runner("examples/example.py")
+    result = runner.run()
+
+    recorder = Recorder(result.events)
+
+    event = recorder.jump_to(10000)
+
+    assert event is not None
+    assert recorder.position == len(result.events) - 1
+    assert recorder.finished
+
+
+def test_recorder_reports_progress():
+    runner = Runner("examples/example.py")
+    result = runner.run()
+
+    recorder = Recorder(result.events)
+
+    assert recorder.progress == 0.0
+
+    recorder.jump_to(4)
+
+    assert recorder.progress == 5 / len(result.events)
