@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from pathlib import Path
 
 from performance_lab.events import ExecutionEvent
 from performance_lab.execution import Execution
+from performance_lab.source import SourceLine, SourceViewer
 
 
 @dataclass(frozen=True)
@@ -15,6 +15,7 @@ class ExecutionView:
     function: str | None
     state: dict[str, object]
     call_stack: list[str]
+    source: list[SourceLine]
     position: int
     total_events: int
 
@@ -41,13 +42,16 @@ class ExecutionView:
                 function=None,
                 state={},
                 call_stack=[],
+                source=[],
                 position=recorder.position,
                 total_events=len(execution.events),
             )
 
+        source_viewer = SourceViewer(event.file)
+
         return cls(
             event=event,
-            file=_display_path(event.file),
+            file=source_viewer.file.as_posix(),
             line=event.line,
             function=event.function,
             state=recorder.state.snapshot(),
@@ -55,6 +59,7 @@ class ExecutionView:
                 execution.events,
                 recorder.position,
             ),
+            source=source_viewer.get_context(event.line),
             position=recorder.position,
             total_events=len(execution.events),
         )
@@ -75,15 +80,3 @@ def _build_call_stack(
                 stack.pop()
 
     return stack
-
-
-def _display_path(path: str) -> str:
-    try:
-        relative_path = (
-            Path(path)
-            .resolve()
-            .relative_to(Path.cwd().resolve())
-        )
-        return relative_path.as_posix()
-    except ValueError:
-        return Path(path).as_posix()

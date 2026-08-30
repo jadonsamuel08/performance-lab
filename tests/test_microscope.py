@@ -8,6 +8,8 @@ def test_microscope_starts_before_execution():
 
     assert not microscope.started
     assert not microscope.finished
+    assert microscope.position == -1
+    assert microscope.total_events == len(execution.events)
     assert microscope.view.position == -1
 
 
@@ -19,6 +21,7 @@ def test_microscope_steps_forward():
 
     assert microscope.started
     assert view.position == 0
+    assert microscope.position == 0
     assert view.event is not None
 
 
@@ -32,6 +35,7 @@ def test_microscope_steps_backward():
     view = microscope.step_back()
 
     assert view.position == 0
+    assert microscope.position == 0
 
 
 def test_microscope_resets():
@@ -45,6 +49,7 @@ def test_microscope_resets():
 
     assert view.position == -1
     assert view.event is None
+    assert microscope.position == -1
     assert not microscope.started
 
 
@@ -55,6 +60,7 @@ def test_microscope_jumps_to_event():
     view = microscope.jump_to(5)
 
     assert view.position == 5
+    assert microscope.position == 5
     assert view.event is not None
 
 
@@ -66,4 +72,31 @@ def test_microscope_reaches_end():
         microscope.step_forward()
 
     assert microscope.finished
-    assert microscope.view.position == len(execution.events) - 1
+    assert microscope.position == len(execution.events) - 1
+
+
+def test_microscope_view_contains_source_context():
+    execution = run("examples/example.py")
+    microscope = Microscope(execution)
+
+    for _ in range(7):
+        microscope.step_forward()
+
+    view = microscope.view
+
+    assert view.source
+    assert any(line.is_current for line in view.source)
+    assert any(line.number == view.line for line in view.source)
+
+
+def test_microscope_view_contains_program_state():
+    execution = run("examples/example.py")
+    microscope = Microscope(execution)
+
+    while not microscope.finished:
+        microscope.step_forward()
+
+    view = microscope.view
+
+    assert view.state["name"] == "Jadon"
+    assert view.state["result"] == "Hello, Jadon!"

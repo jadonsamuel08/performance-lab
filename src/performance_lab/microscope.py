@@ -13,6 +13,14 @@ class Microscope:
         return ExecutionView.from_execution(self.execution)
 
     @property
+    def position(self) -> int:
+        return self.execution.recorder.position
+
+    @property
+    def total_events(self) -> int:
+        return len(self.execution.events)
+
+    @property
     def finished(self) -> bool:
         return self.execution.recorder.finished
 
