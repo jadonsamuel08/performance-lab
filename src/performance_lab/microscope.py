@@ -7,6 +7,7 @@ class Microscope:
 
     def __init__(self, execution: Execution) -> None:
         self.execution = execution
+        self._sync_timeline()
 
     @property
     def view(self) -> ExecutionView:
@@ -30,16 +31,23 @@ class Microscope:
 
     def step_forward(self) -> ExecutionView:
         self.execution.recorder.step_forward()
+        self._sync_timeline()
         return self.view
 
     def step_back(self) -> ExecutionView:
         self.execution.recorder.step_back()
+        self._sync_timeline()
         return self.view
 
     def reset(self) -> ExecutionView:
         self.execution.recorder.reset()
+        self._sync_timeline()
         return self.view
 
     def jump_to(self, position: int) -> ExecutionView:
         self.execution.recorder.jump_to(position)
+        self._sync_timeline()
         return self.view
+
+    def _sync_timeline(self) -> None:
+        self.execution.timeline.position = self.execution.recorder.position

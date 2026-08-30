@@ -100,3 +100,45 @@ def test_microscope_view_contains_program_state():
 
     assert view.state["name"] == "Jadon"
     assert view.state["result"] == "Hello, Jadon!"
+
+def test_microscope_syncs_timeline_after_step_forward():
+    execution = run("examples/example.py")
+    microscope = Microscope(execution)
+
+    microscope.step_forward()
+
+    assert execution.timeline.position == execution.recorder.position
+    assert execution.timeline.current is execution.recorder.current
+
+
+def test_microscope_syncs_timeline_after_step_back():
+    execution = run("examples/example.py")
+    microscope = Microscope(execution)
+
+    microscope.step_forward()
+    microscope.step_forward()
+    microscope.step_back()
+
+    assert execution.timeline.position == execution.recorder.position
+    assert execution.timeline.current is execution.recorder.current
+
+
+def test_microscope_syncs_timeline_after_reset():
+    execution = run("examples/example.py")
+    microscope = Microscope(execution)
+
+    microscope.step_forward()
+    microscope.reset()
+
+    assert execution.timeline.position == execution.recorder.position
+    assert execution.timeline.current is execution.recorder.current
+
+
+def test_microscope_syncs_timeline_after_jump():
+    execution = run("examples/example.py")
+    microscope = Microscope(execution)
+
+    microscope.jump_to(5)
+
+    assert execution.timeline.position == execution.recorder.position
+    assert execution.timeline.current is execution.recorder.current
