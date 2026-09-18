@@ -36,8 +36,8 @@ def test_view_exposes_program_state():
 
     view = ExecutionView.from_execution(execution)
 
-    assert view.state["name"] == "Jadon"
-    assert view.state["result"] == "Hello, Jadon!"
+    assert view.state.get("name") == "Jadon"
+    assert view.state.get("result") == "Hello, Jadon!"
 
 
 def test_view_tracks_call_stack():

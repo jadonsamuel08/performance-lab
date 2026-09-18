@@ -98,8 +98,9 @@ def test_microscope_view_contains_program_state():
 
     view = microscope.view
 
-    assert view.state["name"] == "Jadon"
-    assert view.state["result"] == "Hello, Jadon!"
+    assert view.state.get("name") == "Jadon"
+    assert view.state.get("result") == "Hello, Jadon!"
+
 
 def test_microscope_syncs_timeline_after_step_forward():
     execution = run("examples/example.py")
