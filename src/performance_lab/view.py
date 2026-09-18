@@ -4,6 +4,7 @@ from performance_lab.events import ExecutionEvent
 from performance_lab.execution import Execution
 from performance_lab.source import SourceLine, SourceViewer
 from performance_lab.state_view import StateView
+from performance_lab.state_changes import StateChangesView
 
 
 @dataclass(frozen=True)
@@ -15,6 +16,7 @@ class ExecutionView:
     line: int | None
     function: str | None
     state: StateView
+    state_changes: StateChangesView
     call_stack: list[str]
     source: list[SourceLine]
     position: int
@@ -42,6 +44,7 @@ class ExecutionView:
                 line=None,
                 function=None,
                 state=StateView.from_state({}),
+                state_changes=StateChangesView.from_states({}, {}),
                 call_stack=[],
                 source=[],
                 position=recorder.position,
@@ -50,13 +53,17 @@ class ExecutionView:
 
         source_viewer = SourceViewer(event.file)
 
+        current_state = recorder.state.snapshot()
+
         return cls(
             event=event,
             file=source_viewer.file.as_posix(),
             line=event.line,
             function=event.function,
-            state=StateView.from_state(
-                recorder.state.snapshot()
+            state=StateView.from_state(current_state),
+            state_changes=StateChangesView.from_states(
+                recorder.previous_state,
+                current_state,
             ),
             call_stack=_build_call_stack(
                 execution.events,

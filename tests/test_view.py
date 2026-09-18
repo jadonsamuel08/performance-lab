@@ -12,6 +12,7 @@ def test_view_starts_before_execution():
     assert view.total_events == len(execution.events)
     assert view.progress == 0.0
     assert view.source == []
+    assert view.state_changes.changes == []
 
 
 def test_view_updates_after_stepping():
@@ -38,6 +39,27 @@ def test_view_exposes_program_state():
 
     assert view.state.get("name") == "Jadon"
     assert view.state.get("result") == "Hello, Jadon!"
+
+
+def test_view_exposes_state_changes():
+    execution = run("examples/example.py")
+
+    execution.recorder.jump_to(7)
+
+    view = ExecutionView.from_execution(execution)
+
+    assert view.state_changes.changes
+
+
+def test_view_state_changes_match_current_state():
+    execution = run("examples/example.py")
+
+    execution.recorder.jump_to(7)
+
+    view = ExecutionView.from_execution(execution)
+
+    for change in view.state_changes.changes:
+        assert view.state.get(change.name) == change.current_value
 
 
 def test_view_tracks_call_stack():
