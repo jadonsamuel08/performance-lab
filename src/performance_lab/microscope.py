@@ -1,4 +1,5 @@
 from performance_lab.execution import Execution
+from performance_lab.timeline_view import TimelineView
 from performance_lab.view import ExecutionView
 
 
@@ -12,6 +13,10 @@ class Microscope:
     @property
     def view(self) -> ExecutionView:
         return ExecutionView.from_execution(self.execution)
+
+    @property
+    def timeline(self) -> TimelineView:
+        return TimelineView.from_execution(self.execution)
 
     @property
     def position(self) -> int:
