@@ -33,6 +33,18 @@ class Recorder:
 
         return (self.position + 1) / len(self.events)
 
+    @property
+    def previous_state(self) -> dict[str, object]:
+        if self.position <= 0:
+            return {}
+
+        state = ProgramState()
+
+        for event in self.events[: self.position]:
+            state.apply(event)
+
+        return state.snapshot()
+
     def step_forward(self) -> ExecutionEvent | None:
         if self.finished:
             return self.current
